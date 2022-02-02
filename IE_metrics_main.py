@@ -63,8 +63,9 @@ def metrics_df(gt_dir, test_models):
         if i == 0:
             # create the dataframe
             metric_values = list(metrics(gt_dir, test_models[model]))
-            df = pd.DataFrame(np.array(metric_values).T,
-                              columns=['MSE_{}'.format(model), 'PSNR_{}'.format(model), 'SSIM_{}'.format(model)])
+            df = pd.DataFrame(np.array(metric_values).T, 
+                              columns=['MSE_{}'.format(model), 'CC_{}'.format(model), 
+                                       'PSNR_{}'.format(model), 'SSIM_{}'.format(model)])
             i += 1
         else:
             metric_values = list(metrics(gt_dir, test_models[model]))
