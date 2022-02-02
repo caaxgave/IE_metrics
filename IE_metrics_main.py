@@ -44,16 +44,17 @@ def metrics(gt_dir, test_dir):
     # Particular case where our synthetic data has 'D_' or 'L_' before name
     # test_list = list(element[2:] for element in os.listdir(tests_dir))
 
-    MSE, PSNR, SSIM = [], [], []
+    MSE, PSNR, SSIM, CC = [], [], [], []
     for item in range(len(gt_list)):
       gt_im = cv2.imread(gt_dir + '/' + gt_list[item])
       test_im = cv2.imread(test_dir + '/' + test_list[item])
-      MSE.append(mean_squared_error(gt_im, test_im))
-      PSNR.append(abs(tf.image.psnr(tf.image.convert_image_dtype(gt_im, tf.float32),
-                                   tf.image.convert_image_dtype(test_im, tf.float32), max_val=1.0)).numpy())
+      MSE.append(round(mean_squared_error(gt_im, test_im), 4))
+      CC.append(round(measures.pearsonr(tf.image.convert_image_dtype(gt_im, tf.float32).numpy().flatten(), 
+                                tf.image.convert_image_dtype(test_im, tf.float32).numpy().flatten())[0],4))
+      PSNR.append(round(tf.image.psnr(gt_im, test_im, max_val=255).numpy(), 4))
       SSIM.append(tf.image.ssim(gt_im, test_im, max_val=1.0).numpy())
 
-    return tf.linalg.normalize(MSE)[0].numpy().tolist(), tf.linalg.normalize(PSNR)[0].numpy().tolist(), SSIM
+    return tf.linalg.normalize(MSE)[0].numpy().tolist(), CC, PSNR, SSIM
 
 
 def metrics_df(gt_dir, test_models):
@@ -68,8 +69,9 @@ def metrics_df(gt_dir, test_models):
         else:
             metric_values = list(metrics(gt_dir, test_models[model]))
             df['MSE_{}'.format(model)] = np.array(metric_values[0]).T
-            df['PSNR_{}'.format(model)] = np.array(metric_values[1]).T
-            df['SSIM_{}'.format(model)] = np.array(metric_values[2]).T
+            df['CC_{}'.format(model)] = np.array(metric_values[1]).T
+            df['PSNR_{}'.format(model)] = np.array(metric_values[2]).T
+            df['SSIM_{}'.format(model)] = np.array(metric_values[3]).T
 
     df.to_json(opt.output_metrics + '/' + 'metrics.json')
     df.to_csv(opt.output_metrics + '/' + 'metrics.csv')
