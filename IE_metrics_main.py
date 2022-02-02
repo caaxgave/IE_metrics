@@ -52,7 +52,7 @@ def metrics(gt_dir, test_dir):
       CC.append(round(measures.pearsonr(tf.image.convert_image_dtype(gt_im, tf.float32).numpy().flatten(), 
                                 tf.image.convert_image_dtype(test_im, tf.float32).numpy().flatten())[0],4))
       PSNR.append(round(tf.image.psnr(gt_im, test_im, max_val=255).numpy(), 4))
-      SSIM.append(tf.image.ssim(gt_im, test_im, max_val=1.0).numpy())
+      SSIM.append(tf.image.ssim(gt_im, test_im, max_val=255).numpy())
 
     return tf.linalg.normalize(MSE)[0].numpy().tolist(), CC, PSNR, SSIM
 
